@@ -150,6 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   CannonBallPrefab: {fileID: 861926927124457104, guid: 5cc7cd4af479b2a4fb059a38b1ea5798, type: 3}
   CannonAmmo: 3
+  coreCount: []
 --- !u!4 &135155327
 Transform:
   m_ObjectHideFlags: 0
