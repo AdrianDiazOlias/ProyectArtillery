@@ -38,8 +38,9 @@ public class Cannon : MonoBehaviour
         }
 
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && GMref.isShootingEnabled)
         {
+            GMref.isShootingEnabled = false;
             Shoot();
         }
     }

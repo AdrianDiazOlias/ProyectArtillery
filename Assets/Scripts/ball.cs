@@ -21,6 +21,7 @@ public class ball : MonoBehaviour
             if (slowTimer >= delayBeforeDestroy)
             {
                 Debug.Log("Ball destroyed due to be too slow!");
+                GMref.isShootingEnabled = true;
                 Destroy(gameObject);
             }
         }

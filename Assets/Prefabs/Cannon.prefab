@@ -48,10 +48,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   Pivot: {fileID: 3486386319617872228}
-  Barrel: {fileID: 7609033119432119105}
+  ShotPos: {fileID: 0}
   rotationSpeed: 1
   MaxRotationRight: -5
   MaxRotationLeft: -85
+  shootForce: 30
 --- !u!54 &410333159053498443
 Rigidbody:
   m_ObjectHideFlags: 0
