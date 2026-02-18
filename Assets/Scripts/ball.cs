@@ -7,6 +7,8 @@ public class ball : MonoBehaviour
     [SerializeField] float speedThreshold;
     [SerializeField] float delayBeforeDestroy = 2f;
     private float slowTimer = 0f;
+
+    AudioClip CollisionSound;
     void Start()
     {
         GMref = GameManager.Instance;
@@ -21,6 +23,7 @@ public class ball : MonoBehaviour
             if (slowTimer >= delayBeforeDestroy)
             {
                 Debug.Log("Ball destroyed due to be too slow!");
+                GMref.isShootingEnabled = true;
                 Destroy(gameObject);
             }
         }
@@ -33,5 +36,10 @@ public class ball : MonoBehaviour
     Vector3 CheckBallSpeed()
     {
         return gameObject.GetComponent<Rigidbody>().linearVelocity;
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+
     }
 }

@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
     [Header("Cannon Settings")]
     [SerializeField] GameObject CannonBallPrefab;
     [SerializeField] int CannonAmmo;
+    [SerializeField] public bool isShootingEnabled = true;
 
     [Header("Core Settings")]
     [SerializeField] GameObject[] coreCount;
