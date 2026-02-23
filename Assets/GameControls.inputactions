@@ -7,15 +7,6 @@
             "id": "9577f49e-4182-4ae4-88b5-25bf514818db",
             "actions": [
                 {
-                    "name": "Shoot",
-                    "type": "Button",
-                    "id": "5edd31b6-645e-4c0d-aadc-2bb46a6be5b1",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Aim",
                     "type": "Value",
                     "id": "4d4dd961-4ee7-40cb-9601-4fd868266362",
@@ -23,31 +14,18 @@
                     "processors": "",
                     "interactions": "Hold",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "Shoot",
+                    "type": "Button",
+                    "id": "36149519-6531-4c7f-94c8-216a828ce615",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
-                {
-                    "name": "",
-                    "id": "17ee4b24-cb27-4187-96c0-2e7d97f93c99",
-                    "path": "<Keyboard>/space",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Shoot",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "2b43e788-e895-4497-a54e-d02a25cc87d5",
-                    "path": "<Gamepad>/buttonSouth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Shoot",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
                 {
                     "name": "Keyboard",
                     "id": "0c5d2ebf-9a29-4096-90c8-bbfa8a2bc1fd",
@@ -60,7 +38,7 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "Negative",
+                    "name": "Positive",
                     "id": "456229ee-1d79-44f6-846e-c9891189e821",
                     "path": "<Keyboard>/w",
                     "interactions": "",
@@ -71,7 +49,7 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "Positive",
+                    "name": "Negative",
                     "id": "47f33ae7-6ab5-4bae-96b1-170a6a9cadb1",
                     "path": "<Keyboard>/s",
                     "interactions": "",
@@ -113,6 +91,28 @@
                     "action": "Aim",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "4d4422d7-47f9-4b32-8e1d-9bfd442d3944",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Shoot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a2b022d1-16ad-4ec0-9c2c-f68188c1eedc",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Shoot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },

@@ -1,208 +1,137 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+
+
 public class Cannon : MonoBehaviour
+
 {
     [Header("Cannon Components")]
-    [SerializeField] GameObject Pivot;
-    [SerializeField] GameObject ShotPos;
+    [SerializeField] Transform pivot;
+    [SerializeField] Transform shotPos;
     [SerializeField] ParticleSystem shootParticle;
     [SerializeField] LineRenderer trajectoryLine;
+    [SerializeField] GameObject ballPrefab;
 
-    [Header("Audio GameObjects")]
-    [SerializeField] GameObject shootSoundGO;
-    [SerializeField] GameObject PivotSoundGO;
-    [SerializeField] GameObject ChargeSoundGO;
+    [Header("Audio Sources")]
+    [SerializeField] AudioSource shootAudio;
+    [SerializeField] AudioSource pivotAudio;
+    [SerializeField] AudioSource chargeAudio;
 
     [Header("Cannon Settings")]
-    [SerializeField] float rotationSpeed = 1.0f;
-    [SerializeField] float MaxRotationRight = 80.0f;
-    [SerializeField] float MaxRotationLeft = 0f;
-    [SerializeField] float shootForce = 20f;
-    [SerializeField] float maxShootForce = 50f;
-    [SerializeField] float chargeSpeed = 10f;
+    [SerializeField] float rotationSpeed = 90f;
+    [SerializeField] float maxRotationRight = 80f;
+    [SerializeField] float maxRotationLeft = 0f;
+
+    [Header("Shooting")]
+    [SerializeField] float baseImpulse = 20f;
+    [SerializeField] float maxImpulse = 50f;
+    [SerializeField] float chargeSpeed = 30f;
+
+    [Header("Trajectory")]
     [SerializeField] int trajectorySegments = 50;
     [SerializeField] float trajectoryTimeStep = 0.05f;
 
-    float currentRotationZ;
-    float currentShootForce;
-    bool isCharging = false;
-    float cachedBallMass = 1f;
     GameManager GMref;
-    GameControls gameControls;
 
-    InputAction shootAction;
-    InputAction aimAction;
+    float currentRotationZ;
+    float currentImpulse;
+    bool isCharging;
+    float cachedBallMass;
+
+    GameControls controls;
+    InputAction ShootAction;
+    InputAction AimAction;
 
     void Awake()
     {
-        gameControls = new GameControls();
+        controls = new GameControls();
     }
 
     void OnEnable()
     {
-        shootAction = gameControls.Cannon.Shoot;
-        aimAction = gameControls.Cannon.Aim;
+        controls.Cannon.Enable();
 
-        shootAction.started += OnShootStarted;
-        shootAction.canceled += OnShootCanceled;
+        ShootAction = controls.Cannon.Shoot;
+        AimAction = controls.Cannon.Aim;
+    }
 
-        shootAction.Enable();
-        aimAction.Enable();
+    void OnDisable()
+    {
+        if (controls != null)
+            controls.Cannon.Disable();
     }
 
     void Start()
+
     {
+
         GMref = GameManager.Instance;
-        GameObject testBall = GMref.SpawnBall(transform.position);
-        Rigidbody testRb = testBall.GetComponent<Rigidbody>();
 
-        currentRotationZ = Pivot.transform.eulerAngles.z;
+        currentRotationZ = pivot.eulerAngles.z;
         if (currentRotationZ > 180f) currentRotationZ -= 360f;
-        currentShootForce = shootForce;
 
-        if (testRb != null)
-        {
-            cachedBallMass = testRb.mass;
-        }
-        Destroy(testBall);
+        currentImpulse = baseImpulse;
+
+        Rigidbody rb = ballPrefab.GetComponent<Rigidbody>();
+        cachedBallMass = rb.mass;
+
     }
+
+
 
     void Update()
     {
-        float aimValue = aimAction != null ? aimAction.ReadValue<float>() : 0f;
-        if (!Mathf.Approximately(aimValue, 0f))
-        {
-            float pivotRotation = -aimValue * rotationSpeed * Time.deltaTime;
-            ClampRotation(pivotRotation);
-        }
-
+        HandleRotation();
         HandleCharging();
         UpdateTrajectoryLine();
     }
 
 
-    void ClampRotation(float pivotRotation)
+
+    void HandleRotation()
     {
-        float newRotationZ = currentRotationZ + pivotRotation;
+        float input = 0f;
 
-        newRotationZ = Mathf.Clamp(newRotationZ, MaxRotationLeft, MaxRotationRight);
-
-
-        if (newRotationZ != currentRotationZ)
+        if (AimAction != null)
         {
-            currentRotationZ = newRotationZ;
-            Pivot.transform.rotation = Quaternion.Euler(0, 0, currentRotationZ);
-            PlayRotatingSound();
+            input = AimAction.ReadValue<float>();
         }
 
-        Debug.Log("Current Rotation: " + currentRotationZ);
+        if (Mathf.Approximately(input, 0f)) return;
+
+        float delta = input * rotationSpeed * Time.deltaTime;
+        float newRotation = Mathf.Clamp(currentRotationZ + delta, maxRotationLeft, maxRotationRight);
+
+        if (!Mathf.Approximately(newRotation, currentRotationZ))
+        {
+            currentRotationZ = newRotation;
+            pivot.rotation = Quaternion.Euler(0f, 0f, currentRotationZ);
+
+            if (!pivotAudio.isPlaying) pivotAudio.Play();
+        }
     }
 
     void HandleCharging()
     {
-        if (GMref.CheckAmmo() > 0 && isCharging)
-        {
-            currentShootForce = Mathf.Min(currentShootForce + chargeSpeed * Time.deltaTime, maxShootForce);
-            if (!ChargeSoundGO.GetComponent<AudioSource>().isPlaying && currentShootForce <= maxShootForce * 0.9f)
-            {
-                ChargeSoundGO.GetComponent<AudioSource>().Play();
-            }
-        }
-    }
+        if (GMref.CheckAmmo() <= 0) return;
+        if (ShootAction == null) return;
 
-    void Shoot()
-    {
-        if (ShotPos == null)
-        {
-            Debug.LogError("ShotPos is not assigned!");
-            return;
-        }
-
-        if (GMref.CheckAmmo() > 0)
-        {
-            shootParticle.Play();
-            shootSoundGO.GetComponent<AudioSource>().Play();
-            GMref.UseAmmo();
-            GameObject cannonBall = GMref.SpawnBall(ShotPos.transform.position);
-            Rigidbody rb = cannonBall.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.AddForce(ShotPos.transform.up * currentShootForce, ForceMode.Impulse);
-            }
-            else
-            {
-                Debug.LogError("CannonBall prefab is missing Rigidbody component!");
-            }
-        }
-        else
-        {
-            Debug.Log("Cannot shoot: No ammo left!");
-        }
-
-        GMref.isShootingEnabled = true;
-    }
-
-    void UpdateTrajectoryLine()
-    {
-        if (trajectoryLine == null || ShotPos == null)
-            return;
-
-        if (isCharging)
-        {
-            Vector3[] trajectoryPoints = CalculateTrajectory();
-            trajectoryLine.positionCount = trajectoryPoints.Length;
-            trajectoryLine.SetPositions(trajectoryPoints);
-        }
-        else
-        {
-            trajectoryLine.positionCount = 0;
-        }
-    }
-
-    Vector3[] CalculateTrajectory()
-    {
-        Vector3[] points = new Vector3[trajectorySegments];
-        Vector3 position = ShotPos.transform.position;
-        Vector3 velocity = (ShotPos.transform.up * currentShootForce) / cachedBallMass;
-
-        for (int i = 0; i < trajectorySegments; i++)
-        {
-            points[i] = position;
-            velocity += Physics.gravity * trajectoryTimeStep;
-            position += velocity * trajectoryTimeStep;
-        }
-
-        return points;
-    }
-
-    void OnDisable()
-    {
-        if (shootAction != null)
-        {
-            shootAction.started -= OnShootStarted;
-            shootAction.canceled -= OnShootCanceled;
-            shootAction.Disable();
-        }
-        if (aimAction != null)
-            aimAction.Disable();
-    }
-
-    private void OnShootStarted(InputAction.CallbackContext context)
-    {
-        if (GMref != null && GMref.CheckAmmo() > 0 && GMref.isShootingEnabled)
+        if (!isCharging && ShootAction.WasPressedThisFrame() && GMref.isShootingEnabled)
         {
             isCharging = true;
-            currentShootForce = shootForce;
+            currentImpulse = baseImpulse;
         }
-    }
-
-    private void OnShootCanceled(InputAction.CallbackContext context)
-    {
-        if (isCharging)
+        else if (isCharging && ShootAction.IsPressed())
+        {
+            currentImpulse = Mathf.Min(currentImpulse + chargeSpeed * Time.deltaTime, maxImpulse);
+            if (!chargeAudio.isPlaying && currentImpulse <= maxImpulse * 0.9f)
+                chargeAudio.Play();
+        }
+        else if (isCharging && ShootAction.WasReleasedThisFrame())
         {
             isCharging = false;
-            if (GMref != null && GMref.isShootingEnabled)
+            if (GMref.isShootingEnabled)
             {
                 GMref.isShootingEnabled = false;
                 Shoot();
@@ -210,11 +139,49 @@ public class Cannon : MonoBehaviour
         }
     }
 
-    void PlayRotatingSound()
+    void Shoot()
     {
-        if (!PivotSoundGO.GetComponent<AudioSource>().isPlaying)
+        if (shotPos == null) return;
+
+        if (GMref.CheckAmmo() <= 0) return;
+
+        shootParticle.Play();
+        shootAudio.Play();
+        GMref.UseAmmo();
+
+        GameObject cannonBall = Instantiate(ballPrefab, shotPos.position, Quaternion.identity);
+        Rigidbody rb = cannonBall.GetComponent<Rigidbody>();
+        rb.AddForce(shotPos.up * currentImpulse, ForceMode.Impulse);
+    }
+
+    void UpdateTrajectoryLine()
+    {
+        if (!isCharging || trajectoryLine == null)
         {
-            PivotSoundGO.GetComponent<AudioSource>().Play();
+            trajectoryLine.positionCount = 0;
+            return;
         }
+
+        Vector3[] points = CalculateTrajectory();
+        trajectoryLine.positionCount = points.Length;
+        trajectoryLine.SetPositions(points);
+    }
+
+    Vector3[] CalculateTrajectory()
+    {
+        Vector3[] points = new Vector3[trajectorySegments];
+        Vector3 startPos = shotPos.position;
+        Vector3 initialVelocity = (shotPos.up * currentImpulse) / cachedBallMass;
+        Vector3 gravity = Physics.gravity;
+
+        for (int i = 0; i < trajectorySegments; i++)
+        {
+            float t = i * trajectoryTimeStep;
+
+            Vector3 position = startPos + initialVelocity * t + 0.5f * gravity * t * t;
+            points[i] = position;
+        }
+
+        return points;
     }
 }

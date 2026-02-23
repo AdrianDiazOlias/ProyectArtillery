@@ -9,6 +9,7 @@ public class ScreenManager : MonoBehaviour
     SoundManager SMref;
 
     [Header("Menu Screens")]
+    GameObject[] ScreensGame;
     [SerializeField] GameObject PauseMenu;
     [SerializeField] GameObject GameOverScreen;
     [SerializeField] GameObject WinScreen;
@@ -39,6 +40,8 @@ public class ScreenManager : MonoBehaviour
         GMref = GameManager.Instance;
         SMref = SoundManager.Instance;
 
+        ScreensGame = new GameObject[] { PauseMenu, GameOverScreen, WinScreen };
+
         masterSlider.value = SMref.GetSavedVolume("Master");
         musicSlider.value = SMref.GetSavedVolume("Music");
         sfxSlider.value = SMref.GetSavedVolume("SFX");
@@ -55,23 +58,47 @@ public class ScreenManager : MonoBehaviour
         ammoText.text = "Ammo: " + GMref.CannonAmmo;
     }
 
-    public void TogglePauseMenu()
+    public void GetAllScreensOff()
     {
-        bool isPaused = !PauseMenu.activeSelf;
+        foreach (GameObject screen in ScreensGame)
+        {
+            screen.SetActive(false);
+        }
+    }
+
+    public bool IsPauseMenuActive()
+    {
+        return PauseMenu.activeSelf;
+    }
+
+    public void TogglePauseMenu(bool isPaused)
+    {
         PauseMenu.SetActive(isPaused);
         Time.timeScale = isPaused ? 0 : 1;
     }
 
-    public void ToggleGameOverScreen()
+
+    public bool IsGameOverScreenActive()
     {
-        GameOverScreen.SetActive(!GameOverScreen.activeSelf);
-        Time.timeScale = GameOverScreen.activeSelf ? 0 : 1;
+        return GameOverScreen.activeSelf;
     }
 
-    public void ToggleWinScreen()
+    public void ToggleGameOverScreen(bool isGameOver)
     {
-        WinScreen.SetActive(!WinScreen.activeSelf);
-        Time.timeScale = WinScreen.activeSelf ? 0 : 1;
+        GameOverScreen.SetActive(isGameOver);
+        Time.timeScale = isGameOver ? 0 : 1;
+    }
+
+
+    public bool IsWinScreenActive()
+    {
+        return WinScreen.activeSelf;
+    }
+
+    public void ToggleWinScreen(bool isWinScreen)
+    {
+        WinScreen.SetActive(isWinScreen);
+        Time.timeScale = isWinScreen ? 0 : 1;
     }
 
 }

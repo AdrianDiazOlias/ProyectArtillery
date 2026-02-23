@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class ball : MonoBehaviour
@@ -8,7 +9,6 @@ public class ball : MonoBehaviour
     [SerializeField] float delayBeforeDestroy = 2f;
     private float slowTimer = 0f;
 
-    AudioClip CollisionSound;
     void Start()
     {
         GMref = GameManager.Instance;
@@ -16,8 +16,9 @@ public class ball : MonoBehaviour
 
     void Update()
     {
+        Vector3 ballPos = transform.position;
         float speed = CheckBallSpeed().magnitude;
-        if (speed < speedThreshold)
+        if (speed < speedThreshold || ballPos.y < -10f)
         {
             slowTimer += Time.deltaTime;
             if (slowTimer >= delayBeforeDestroy)

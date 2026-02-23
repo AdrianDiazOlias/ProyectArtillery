@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Cannon Settings")]
     [SerializeField] GameObject CannonBallPrefab;
-    [SerializeField] public int CannonAmmo { get; private set; }
+    [SerializeField] public int CannonAmmo { get; private set; } = 3;
     [SerializeField] public bool isShootingEnabled = true;
 
     [Header("Core Settings")]
@@ -34,7 +34,7 @@ public class GameManager : MonoBehaviour
     private void OnEnable()
     {
         TogglePauseAction = gameControls.ScreenControls.TogglePause;
-        TogglePauseAction.performed += ctx => ScreenMref.TogglePauseMenu();
+        TogglePauseAction.performed += ctx => ScreenMref.TogglePauseMenu(ScreenMref.IsPauseMenuActive() ? false : true);
         TogglePauseAction.Enable();
     }
 
@@ -83,7 +83,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("Cores in scene: " + coreCount.Length);
         if (coreCount.Length == 0)
         {
-            ScreenMref.ToggleWinScreen();
+            ScreenMref.ToggleWinScreen(true);
             Debug.Log("All cores destroyed! You win!");
         }
     }
@@ -105,13 +105,19 @@ public class GameManager : MonoBehaviour
 
     public void ResumeGame()
     {
-        ScreenMref.TogglePauseMenu();
+        ScreenMref.GetAllScreensOff();
+        ScreenMref.TogglePauseMenu(false);
     }
 
     public void RestartGame()
     {
-        ScreenMref.TogglePauseMenu();
-        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+        Time.timeScale = 1;
+        ScreenMref.GetAllScreensOff();
+        UnityEngine.SceneManagement.SceneManager.LoadScene(1);
+        Invoke(nameof(FindCoresInScene), 0.1f);
+        CannonAmmo = 3;
+        ScreenMref.UpdateAmmoText();
+        isShootingEnabled = true;
     }
 
     public void QuitGame()
@@ -121,7 +127,8 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
-        ScreenMref.ToggleGameOverScreen();
+        ScreenMref.GetAllScreensOff();
+        ScreenMref.ToggleGameOverScreen(true);
     }
 }
 

@@ -93,15 +93,6 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
             ""id"": ""9577f49e-4182-4ae4-88b5-25bf514818db"",
             ""actions"": [
                 {
-                    ""name"": ""Shoot"",
-                    ""type"": ""Button"",
-                    ""id"": ""5edd31b6-645e-4c0d-aadc-2bb46a6be5b1"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Aim"",
                     ""type"": ""Value"",
                     ""id"": ""4d4dd961-4ee7-40cb-9601-4fd868266362"",
@@ -109,31 +100,18 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": ""Hold"",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Shoot"",
+                    ""type"": ""Button"",
+                    ""id"": ""36149519-6531-4c7f-94c8-216a828ce615"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
-                {
-                    ""name"": """",
-                    ""id"": ""17ee4b24-cb27-4187-96c0-2e7d97f93c99"",
-                    ""path"": ""<Keyboard>/space"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Shoot"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""2b43e788-e895-4497-a54e-d02a25cc87d5"",
-                    ""path"": ""<Gamepad>/buttonSouth"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Shoot"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
                 {
                     ""name"": ""Keyboard"",
                     ""id"": ""0c5d2ebf-9a29-4096-90c8-bbfa8a2bc1fd"",
@@ -146,7 +124,7 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": ""Negative"",
+                    ""name"": ""Positive"",
                     ""id"": ""456229ee-1d79-44f6-846e-c9891189e821"",
                     ""path"": ""<Keyboard>/w"",
                     ""interactions"": """",
@@ -157,7 +135,7 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 },
                 {
-                    ""name"": ""Positive"",
+                    ""name"": ""Negative"",
                     ""id"": ""47f33ae7-6ab5-4bae-96b1-170a6a9cadb1"",
                     ""path"": ""<Keyboard>/s"",
                     ""interactions"": """",
@@ -199,6 +177,28 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
                     ""action"": ""Aim"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4d4422d7-47f9-4b32-8e1d-9bfd442d3944"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Shoot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a2b022d1-16ad-4ec0-9c2c-f68188c1eedc"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Shoot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -263,8 +263,8 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
 }");
         // Cannon
         m_Cannon = asset.FindActionMap("Cannon", throwIfNotFound: true);
-        m_Cannon_Shoot = m_Cannon.FindAction("Shoot", throwIfNotFound: true);
         m_Cannon_Aim = m_Cannon.FindAction("Aim", throwIfNotFound: true);
+        m_Cannon_Shoot = m_Cannon.FindAction("Shoot", throwIfNotFound: true);
         // ScreenControls
         m_ScreenControls = asset.FindActionMap("ScreenControls", throwIfNotFound: true);
         m_ScreenControls_TogglePause = m_ScreenControls.FindAction("TogglePause", throwIfNotFound: true);
@@ -349,8 +349,8 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
     // Cannon
     private readonly InputActionMap m_Cannon;
     private List<ICannonActions> m_CannonActionsCallbackInterfaces = new List<ICannonActions>();
-    private readonly InputAction m_Cannon_Shoot;
     private readonly InputAction m_Cannon_Aim;
+    private readonly InputAction m_Cannon_Shoot;
     /// <summary>
     /// Provides access to input actions defined in input action map "Cannon".
     /// </summary>
@@ -363,13 +363,13 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
         /// </summary>
         public CannonActions(@GameControls wrapper) { m_Wrapper = wrapper; }
         /// <summary>
-        /// Provides access to the underlying input action "Cannon/Shoot".
-        /// </summary>
-        public InputAction @Shoot => m_Wrapper.m_Cannon_Shoot;
-        /// <summary>
         /// Provides access to the underlying input action "Cannon/Aim".
         /// </summary>
         public InputAction @Aim => m_Wrapper.m_Cannon_Aim;
+        /// <summary>
+        /// Provides access to the underlying input action "Cannon/Shoot".
+        /// </summary>
+        public InputAction @Shoot => m_Wrapper.m_Cannon_Shoot;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -396,12 +396,12 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_CannonActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_CannonActionsCallbackInterfaces.Add(instance);
-            @Shoot.started += instance.OnShoot;
-            @Shoot.performed += instance.OnShoot;
-            @Shoot.canceled += instance.OnShoot;
             @Aim.started += instance.OnAim;
             @Aim.performed += instance.OnAim;
             @Aim.canceled += instance.OnAim;
+            @Shoot.started += instance.OnShoot;
+            @Shoot.performed += instance.OnShoot;
+            @Shoot.canceled += instance.OnShoot;
         }
 
         /// <summary>
@@ -413,12 +413,12 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
         /// <seealso cref="CannonActions" />
         private void UnregisterCallbacks(ICannonActions instance)
         {
-            @Shoot.started -= instance.OnShoot;
-            @Shoot.performed -= instance.OnShoot;
-            @Shoot.canceled -= instance.OnShoot;
             @Aim.started -= instance.OnAim;
             @Aim.performed -= instance.OnAim;
             @Aim.canceled -= instance.OnAim;
+            @Shoot.started -= instance.OnShoot;
+            @Shoot.performed -= instance.OnShoot;
+            @Shoot.canceled -= instance.OnShoot;
         }
 
         /// <summary>
@@ -569,19 +569,19 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
     public interface ICannonActions
     {
         /// <summary>
-        /// Method invoked when associated input action "Shoot" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnShoot(InputAction.CallbackContext context);
-        /// <summary>
         /// Method invoked when associated input action "Aim" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnAim(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Shoot" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnShoot(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "ScreenControls" which allows adding and removing callbacks.
