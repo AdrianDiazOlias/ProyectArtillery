@@ -1,13 +1,17 @@
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
+    ScreenManager ScreenMref;
+    GameControls gameControls;
+
+    InputAction TogglePauseAction;
 
     [Header("Cannon Settings")]
     [SerializeField] GameObject CannonBallPrefab;
-    [SerializeField] int CannonAmmo;
+    [SerializeField] public int CannonAmmo { get; private set; }
     [SerializeField] public bool isShootingEnabled = true;
 
     [Header("Core Settings")]
@@ -24,12 +28,20 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-    }
 
+        gameControls = new GameControls();
+    }
+    private void OnEnable()
+    {
+        TogglePauseAction = gameControls.ScreenControls.TogglePause;
+        TogglePauseAction.performed += ctx => ScreenMref.TogglePauseMenu();
+        TogglePauseAction.Enable();
+    }
 
     void Start()
     {
         FindCoresInScene();
+        ScreenMref = ScreenManager.Instance;
     }
 
     public GameObject SpawnBall(Vector3 spawnPosition)
@@ -51,6 +63,7 @@ public class GameManager : MonoBehaviour
         if (CannonAmmo > 0)
         {
             CannonAmmo--;
+            ScreenMref.UpdateAmmoText();
             Debug.Log("Ammo used. Remaining ammo: " + CannonAmmo);
         }
         else
@@ -70,6 +83,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("Cores in scene: " + coreCount.Length);
         if (coreCount.Length == 0)
         {
+            ScreenMref.ToggleWinScreen();
             Debug.Log("All cores destroyed! You win!");
         }
     }
@@ -88,4 +102,26 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
+    public void ResumeGame()
+    {
+        ScreenMref.TogglePauseMenu();
+    }
+
+    public void RestartGame()
+    {
+        ScreenMref.TogglePauseMenu();
+        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
+    public void GameOver()
+    {
+        ScreenMref.ToggleGameOverScreen();
+    }
 }
+

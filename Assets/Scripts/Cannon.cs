@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Cannon : MonoBehaviour
 {
@@ -28,6 +29,27 @@ public class Cannon : MonoBehaviour
     bool isCharging = false;
     float cachedBallMass = 1f;
     GameManager GMref;
+    GameControls gameControls;
+
+    InputAction shootAction;
+    InputAction aimAction;
+
+    void Awake()
+    {
+        gameControls = new GameControls();
+    }
+
+    void OnEnable()
+    {
+        shootAction = gameControls.Cannon.Shoot;
+        aimAction = gameControls.Cannon.Aim;
+
+        shootAction.started += OnShootStarted;
+        shootAction.canceled += OnShootCanceled;
+
+        shootAction.Enable();
+        aimAction.Enable();
+    }
 
     void Start()
     {
@@ -48,17 +70,10 @@ public class Cannon : MonoBehaviour
 
     void Update()
     {
-        float pivotRotation = 0f;
-
-        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
+        float aimValue = aimAction != null ? aimAction.ReadValue<float>() : 0f;
+        if (!Mathf.Approximately(aimValue, 0f))
         {
-            pivotRotation = rotationSpeed;
-            ClampRotation(pivotRotation);
-
-        }
-        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
-        {
-            pivotRotation = -rotationSpeed;
+            float pivotRotation = -aimValue * rotationSpeed * Time.deltaTime;
             ClampRotation(pivotRotation);
         }
 
@@ -86,29 +101,12 @@ public class Cannon : MonoBehaviour
 
     void HandleCharging()
     {
-        if (GMref.CheckAmmo() > 0)
+        if (GMref.CheckAmmo() > 0 && isCharging)
         {
-            if (Input.GetKeyDown(KeyCode.Space) && GMref.isShootingEnabled)
+            currentShootForce = Mathf.Min(currentShootForce + chargeSpeed * Time.deltaTime, maxShootForce);
+            if (!ChargeSoundGO.GetComponent<AudioSource>().isPlaying && currentShootForce <= maxShootForce * 0.9f)
             {
-                isCharging = true;
-                currentShootForce = shootForce;
-            }
-            else if (Input.GetKey(KeyCode.Space) && isCharging)
-            {
-                currentShootForce = Mathf.Min(currentShootForce + chargeSpeed * Time.deltaTime, maxShootForce);
-                if (!ChargeSoundGO.GetComponent<AudioSource>().isPlaying && currentShootForce <= maxShootForce * 0.9f)
-                {
-                    ChargeSoundGO.GetComponent<AudioSource>().Play();
-                }
-            }
-            else if (Input.GetKeyUp(KeyCode.Space) && isCharging)
-            {
-                isCharging = false;
-                if (GMref.isShootingEnabled)
-                {
-                    GMref.isShootingEnabled = false;
-                    Shoot();
-                }
+                ChargeSoundGO.GetComponent<AudioSource>().Play();
             }
         }
     }
@@ -141,6 +139,8 @@ public class Cannon : MonoBehaviour
         {
             Debug.Log("Cannot shoot: No ammo left!");
         }
+
+        GMref.isShootingEnabled = true;
     }
 
     void UpdateTrajectoryLine()
@@ -174,6 +174,40 @@ public class Cannon : MonoBehaviour
         }
 
         return points;
+    }
+
+    void OnDisable()
+    {
+        if (shootAction != null)
+        {
+            shootAction.started -= OnShootStarted;
+            shootAction.canceled -= OnShootCanceled;
+            shootAction.Disable();
+        }
+        if (aimAction != null)
+            aimAction.Disable();
+    }
+
+    private void OnShootStarted(InputAction.CallbackContext context)
+    {
+        if (GMref != null && GMref.CheckAmmo() > 0 && GMref.isShootingEnabled)
+        {
+            isCharging = true;
+            currentShootForce = shootForce;
+        }
+    }
+
+    private void OnShootCanceled(InputAction.CallbackContext context)
+    {
+        if (isCharging)
+        {
+            isCharging = false;
+            if (GMref != null && GMref.isShootingEnabled)
+            {
+                GMref.isShootingEnabled = false;
+                Shoot();
+            }
+        }
     }
 
     void PlayRotatingSound()
