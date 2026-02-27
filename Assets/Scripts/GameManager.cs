@@ -5,6 +5,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
     ScreenManager ScreenMref;
+    SceneManager SceneMref;
     GameControls gameControls;
 
     InputAction TogglePauseAction;
@@ -40,8 +41,11 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        FindCoresInScene();
         ScreenMref = ScreenManager.Instance;
+        SceneMref = SceneManager.Instance;
+
+        SceneMref.LoadScene(0);
+        Invoke(nameof(FindCoresInScene), 0.1f);
     }
 
     public GameObject SpawnBall(Vector3 spawnPosition)
@@ -103,6 +107,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void ResetCannon()
+    {
+        CannonAmmo = 3;
+        ScreenMref.UpdateAmmoText();
+        isShootingEnabled = true;
+    }
+
     public void ResumeGame()
     {
         ScreenMref.GetAllScreensOff();
@@ -115,9 +126,7 @@ public class GameManager : MonoBehaviour
         ScreenMref.GetAllScreensOff();
         UnityEngine.SceneManagement.SceneManager.LoadScene(1);
         Invoke(nameof(FindCoresInScene), 0.1f);
-        CannonAmmo = 3;
-        ScreenMref.UpdateAmmoText();
-        isShootingEnabled = true;
+        ResetCannon();
     }
 
     public void QuitGame()
